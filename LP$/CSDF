@@ -1,0 +1,396 @@
+
+from email import policy
+from email.parser import Parser
+import re
+
+# Read email header from the user
+print("Enter the email header (enter a blank line to finish):")
+
+header_lines = []
+
+while True:
+    line = input()
+    if line == "":
+        break
+    header_lines.append(line)
+
+header_text = "\n".join(header_lines)
+
+# Parse the email header
+email_data = Parser(policy=policy.default).parsestr(
+    header_text + "\n\n"
+)
+
+print("\n----- EMAIL HEADER ANALYSIS -----")
+
+# Display important header fields
+fields = [
+    "From",
+    "To",
+    "Date",
+    "Subject",
+    "Reply-To",
+    "Return-Path",
+    "Message-ID"
+]
+
+for field in fields:
+    print(f"{field}: {email_data.get(field, 'Not available')}")
+
+# Analyze Received headers to find routing information
+received_headers = email_data.get_all("Received", [])
+
+print("\n----- EMAIL ROUTING DETAILS -----")
+
+if received_headers:
+    for i, received in enumerate(received_headers, 1):
+        print(f"Hop {i}: {received}")
+
+        # Extract IPv4 addresses
+        ips = re.findall(
+            r"\b(?:\d{1,3}\.){3}\d{1,3}\b",
+            str(received)
+        )
+
+        for ip in ips:
+            print("  IP Address:", ip)
+else:
+    print("No Received headers found.")
+
+# Basic suspicious-email indicators
+print("\n----- INVESTIGATION CHECKS -----")
+
+sender = email_data.get("From", "")
+reply_to = email_data.get("Reply-To", "")
+return_path = email_data.get("Return-Path", "")
+
+if reply_to and reply_to != sender:
+    print("Warning: Reply-To differs from From.")
+
+if return_path and return_path != sender:
+    print("Warning: Return-Path differs from From.")
+
+if not email_data.get("Authentication-Results"):
+    print("Authentication-Results header not found.")
+
+print("\nAnalysis completed.")
+
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+#include <string>
+using namespace std;
+
+int main()
+{
+    string characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    string captcha = "";
+    string userInput;
+
+    srand(time(0));
+
+    // Generate a random CAPTCHA of 6 characters
+    for (int i = 0; i < 6; i++)
+    {
+        captcha += characters[rand() % characters.length()];
+    }
+
+    cout << "Generated CAPTCHA: " << captcha << endl;
+
+    cout << "Enter the CAPTCHA: ";
+    cin >> userInput;
+
+    // Verify CAPTCHA
+    if (userInput == captcha)
+    {
+        cout << "CAPTCHA Verified Successfully!" << endl;
+        cout << "Access Granted." << endl;
+    }
+    else
+    {
+        cout << "Invalid CAPTCHA!" << endl;
+        cout << "Access Denied." << endl;
+    }
+
+    return 0;
+}
+
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+from collections import defaultdict
+from datetime import datetime
+
+MAX_ATTEMPTS = 5
+
+failed_attempts = defaultdict(int)
+blocked_devices = set()
+
+# Simulated IEEE 802.11 authentication log
+wifi_logs = [
+    ("AA:BB:CC:11:22:33", "FAIL"),
+    ("AA:BB:CC:11:22:33", "FAIL"),
+    ("AA:BB:CC:11:22:33", "FAIL"),
+    ("AA:BB:CC:11:22:33", "FAIL"),
+    ("AA:BB:CC:11:22:33", "FAIL"),
+    ("DD:EE:FF:44:55:66", "SUCCESS"),
+]
+
+print("Wi-Fi Intrusion Detection System")
+print("--------------------------------")
+
+for mac, status in wifi_logs:
+    print("\nDevice:", mac)
+
+    if mac in blocked_devices:
+        print("Access denied: Device is blocked.")
+        continue
+
+    if status == "FAIL":
+        failed_attempts[mac] += 1
+        print("Failed authentication:",
+              failed_attempts[mac])
+
+        if failed_attempts[mac] >= MAX_ATTEMPTS:
+            blocked_devices.add(mac)
+            print("ALERT: Password cracking suspected!")
+            print("Device blocked by detection system.")
+
+    elif status == "SUCCESS":
+        print("Authentication successful.")
+
+print("\nFinal Security Report")
+print("---------------------")
+print("Blocked devices:", blocked_devices)
+print("Detection time:", datetime.now().strftime(
+    "%Y-%m-%d %H:%M:%S"
+))
+
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <filesystem>
+using namespace std;
+namespace fs = std::filesystem;
+
+// Function to recover deleted files from a folder
+void recoverFiles() {
+    string folder, destination;
+
+    cout << "\nEnter folder to scan: ";
+    cin >> folder;
+
+    cout << "Enter destination folder: ";
+    cin >> destination;
+
+    if (!fs::exists(folder) || !fs::is_directory(folder)) {
+        cout << "Invalid folder!\n";
+        return;
+    }
+
+    fs::create_directories(destination);
+    int count = 0;
+
+    cout << "\nScanning files...\n";
+
+    for (const auto& entry : fs::recursive_directory_iterator(
+             folder, fs::directory_options::skip_permission_denied)) {
+        if (entry.is_regular_file()) {
+            cout << "Found: " << entry.path().string() << "\n";
+            cout << "Copy this file? (y/n): ";
+
+            char choice;
+            cin >> choice;
+
+            if (choice == 'y' || choice == 'Y') {
+                try {
+                    fs::copy_file(
+                        entry.path(),
+                        fs::path(destination) / entry.path().filename(),
+                        fs::copy_options::skip_existing
+                    );
+                    cout << "File copied successfully.\n";
+                    count++;
+                } catch (const fs::filesystem_error& e) {
+                    cout << "Could not copy file.\n";
+                }
+            }
+        }
+    }
+
+    cout << "\nFiles copied: " << count << "\n";
+    cout << "Note: This scans existing files; it does not recover "
+         << "truly deleted files.\n";
+}
+
+// Function to detect partition signatures in a disk image
+void detectPartitions() {
+    string filename;
+    cout << "\nEnter disk image filename: ";
+    cin >> filename;
+
+    ifstream file(filename, ios::binary);
+
+    if (!file) {
+        cout << "Cannot open disk image!\n";
+        return;
+    }
+
+    // Check MBR signature at byte offsets 510 and 511
+    file.seekg(510);
+    unsigned char sig[2];
+    file.read(reinterpret_cast<char*>(sig), 2);
+
+    if (file.gcount() == 2 && sig[0] == 0x55 && sig[1] == 0xAA)
+        cout << "MBR boot signature found.\n";
+    else
+        cout << "MBR signature not found at offset 510.\n";
+
+    // Search for NTFS boot sector signature
+    file.clear();
+    file.seekg(0);
+
+    char buffer[512];
+    int sector = 0, found = 0;
+
+    while (file.read(buffer, sizeof(buffer)) || file.gcount() > 0) {
+        if (file.gcount() >= 4 &&
+            buffer[3] == 'N' &&
+            buffer[4] == 'T' &&
+            buffer[5] == 'F' &&
+            buffer[6] == 'S') {
+            cout << "Possible NTFS boot sector at offset "
+                 << sector * 512 << " bytes.\n";
+            found++;
+        }
+        sector++;
+    }
+
+    if (found == 0)
+        cout << "No NTFS boot sector signature detected.\n";
+
+    cout << "Signature scan completed.\n";
+    cout << "Note: Signatures alone cannot confirm a deleted partition.\n";
+    file.close();
+}
+
+int main() {
+    int choice;
+
+    do {
+        cout << "\n===== COMPUTER FORENSIC APPLICATION =====\n";
+        cout << "1. Scan and Copy Available Files\n";
+        cout << "2. Detect Partition Signatures in Disk Image\n";
+        cout << "3. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                recoverFiles();
+                break;
+            case 2:
+                detectPartitions();
+                break;
+            case 3:
+                cout << "Exiting application.\n";
+                break;
+            default:
+                cout << "Invalid choice!\n";
+        }
+    } while (choice != 3);
+
+    return 0;
+}
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <map>
+using namespace std;
+
+int main()
+{
+    ofstream fout("system_log.txt", ios::app);
+
+    if (!fout)
+    {
+        cout << "Error opening log file!" << endl;
+        return 1;
+    }
+
+    int n;
+    cout << "Enter number of events to capture: ";
+    cin >> n;
+
+    map<string, int> failedLogins;
+    string time, ip, event;
+
+    for (int i = 0; i < n; i++)
+    {
+        cout << "\nEvent " << i + 1 << endl;
+
+        cout << "Enter timestamp: ";
+        cin >> time;
+
+        cout << "Enter IP address: ";
+        cin >> ip;
+
+        cout << "Enter event (FAILED or SUCCESS): ";
+        cin >> event;
+
+        fout << time << " " << ip << " " << event << endl;
+
+        // Event correlation
+        if (event == "FAILED")
+        {
+            failedLogins[ip]++;
+        }
+    }
+
+    fout.close();
+
+    cout << "\n--- Event Correlation Report ---\n";
+
+    for (auto entry : failedLogins)
+    {
+        cout << "IP Address: " << entry.first
+             << " | Failed Attempts: " << entry.second;
+
+        if (entry.second >= 3)
+        {
+            cout << " | ALERT: Possible Brute-Force Attack!";
+        }
+
+        cout << endl;
+    }
+
+    cout << "\nLogs saved successfully in system_log.txt\n";
+
+    return 0;
+}
+
+
